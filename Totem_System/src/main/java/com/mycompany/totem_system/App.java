@@ -32,56 +32,46 @@ import com.github.britooo.looca.api.group.processos.Processo;
 import com.github.britooo.looca.api.group.processos.ProcessoGrupo;
 import com.github.britooo.looca.api.group.temperatura.Temperatura;
 import com.github.britooo.looca.api.util.Conversor;
-import java.util.List;
-import org.springframework.jdbc.core.JdbcTemplate;
-import java.util.concurrent.TimeUnit;
+
 import org.springframework.dao.DataAccessException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
- * @author Vinícius
+ * @author Matheus Nascimento
  */
 public class App {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, SQLException {
+        Scanner leitor = new Scanner(System.in);
+        Scanner leitor2 = new Scanner(System.in);
 
         Looca looca = new Looca();
-        Connection connection = new Connection();
-        JdbcTemplate con = connection.getConnection();
-//        ConnectionSQL connectionSQL = new ConnectionSQL();
-//        JdbcTemplate conSQL = connectionSQL.getConnection();
+        Connection con = DriverManager.getConnection("jdbc:sqlserver://animix.database.windows.net:1433;database=animix;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;", "admin-1adsb-grupo07", "#Gfgrupo7");
+//        Connection connection = new Connection();
+//        JdbcTemplate con = connection.getConnection();
 
-        Integer fkTotem = 1;
-//        Boolean first = true;
-        Boolean start = true;
+        System.out.println("digite seu usuario");
 
-        Login log = new Login();
-        log.show();
+        String user = leitor.nextLine();
+        System.out.println("digite sua senha");
 
-        // Limpar as tabelas
-        try {
-            String deleteDisco = String.format("DELETE FROM disco WHERE fkTotem = %d;", fkTotem);
-            con.update(deleteDisco);
-            String deleteMemoria = String.format("DELETE FROM memoria WHERE fkTotem = %d;", fkTotem);
-            con.update(deleteMemoria);
-            String deleteProcessador = String.format("DELETE FROM processador WHERE fkTotem = %d;", fkTotem);
-            con.update(deleteProcessador); 
-            
-        } catch (DataAccessException e) {
-            
-        }
+        String senha = leitor.nextLine();
+        Statement stm = con.createStatement();
+        String login = "select * from funcionario where email='" + user + "' and senha='" + senha + "'";
+        ResultSet rs = stm.executeQuery(login);
 
-//        System.out.println("Deletou???");
-        // Inserir na tabela disco
+        Statement stm2 = con.createStatement();
+        String login2 = "select * from funcionario where email='" + user + "' and senha='" + senha + "'";
+        ResultSet rs2 = stm2.executeQuery(login2);
 
-//        long volumeTotal = looca.getGrupoDeDiscos().getTamanhoTotal();
-//        String volumeTotalInsert = Conversor.formatarBytes(volumeTotal);
-//
-//        String insertStatementDisco = "INSERT INTO disco VALUES (?, ?);";
-
-//        con.update(insertStatementDisco, fkTotem, volumeTotalInsert);
-//        conSQL.update(insertStatementDisco, fkTotem, volumeTotalInsert);
-//        System.out.println("Inseriu na tabela disco");
+        Integer fkTotem = 3;
 
         // Inserir na tabela memoria
         long memoriaTotal = looca.getMemoria().getTotal();
@@ -89,9 +79,7 @@ public class App {
 
         String insertStatementMemoria = "INSERT INTO memoria VALUES (?,  ?);";
 
-        con.update(insertStatementMemoria, fkTotem, memoriaTotalInsert);
-//        conSQL.update(insertStatementMemoria, fkTotem, memoriaTotalInsert);
-//        System.out.println("Inseriu na tabela memoria");
+        coletarDados(insertStatementMemoria, fkTotem, memoriaTotalInsert);
 
         // Inserir na tabela processador
         String fabricanteProcessador = looca.getProcessador().getFabricante();
@@ -107,30 +95,78 @@ public class App {
 
         // Inserir na tabela dado 
         // Fica constantemente inserindo dados
-        while (start) {
-            TimeUnit.SECONDS.sleep(20);
+        while (!rs.next()) {
+
+            System.out.println("digite seu usuario");
+
+            user = leitor.nextLine();
+            System.out.println("digite sua senha");
+
+            senha = leitor.nextLine();
+            stm = con.createStatement();
+            login = "select * from funcionario where email='" + user + "' and senha='" + senha + "'";
+            rs = stm.executeQuery(login);
+
+            stm2 = con.createStatement();
+            login2 = "select * from funcionario where email='" + user + "' and senha='" + senha + "'";
+            rs2 = stm2.executeQuery(login2);
+        }
+        if (rs.next()) {
+
+            try {
+                System.out.println("Coletando Dados...");
+                TimeUnit.SECONDS.sleep(20);
 //          Dados volateis
 //          Memoria
-            long memoriaUso = looca.getMemoria().getEmUso();
-            String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".");
-            Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
+                long memoriaUso = looca.getMemoria().getEmUso();
+                String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".");
+                Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
 //          RAM
-            long memoriaDisponivel = looca.getMemoria().getDisponivel();
-            String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB","");
-            Double memoriaDisponivelInsert = Double.parseDouble(memoriaDisponiveForm);
+                long memoriaDisponivel = looca.getMemoria().getDisponivel();
+                String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB", "");
+                Double memoriaDisponivelInsert = Double.parseDouble(memoriaDisponiveForm);
 //          Processador
-            Double processadorUso = looca.getProcessador().getUso();
-            String processadorUsoForm = String.format("%.2f", processadorUso).replace(",", ".");
-            Double processadorUsoInsert = Double.parseDouble(processadorUsoForm);
+                Double processadorUso = looca.getProcessador().getUso();
+                String processadorUsoForm = String.format("%.2f", processadorUso).replace(",", ".");
+                Double processadorUsoInsert = Double.parseDouble(processadorUsoForm);
 //          Temperatura
-            Double temperatura = looca.getTemperatura().getTemperatura();
+                Double temperatura = looca.getTemperatura().getTemperatura();
 
-            String insertStatement = "INSERT INTO dado VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
-//            String insertStatement2 = "INSERT INTO dado VALUES (null, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+                String insertStatement = "INSERT INTO dado VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
-            con.update(insertStatement, fkTotem, memoriaUsoInsert, memoriaDisponivelInsert, processadorUsoInsert, temperatura);
-//            conSQL.update(insertStatement2, fkTotem, memoriaUsoInsert, memoriaDisponivelinsert, processadorUsoInsert, temperatura);
-            System.out.println("Inseriu na tabela dado");
+                con.update(insertStatement, fkTotem, memoriaUsoInsert, memoriaDisponivelInsert, processadorUsoInsert, temperatura);
+                System.out.println("Inseriu na tabela dado");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        } if (rs2.next()) {
+
+            try {
+                System.out.println("Coletando Dados...");
+                TimeUnit.SECONDS.sleep(20);
+//          Dados volateis
+//          Memoria
+                long memoriaUso = looca.getMemoria().getEmUso();
+                String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".");
+                Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
+//          RAM
+                long memoriaDisponivel = looca.getMemoria().getDisponivel();
+                String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB", "");
+                Double memoriaDisponivelInsert = Double.parseDouble(memoriaDisponiveForm);
+//          Processador
+                Double processadorUso = looca.getProcessador().getUso();
+                String processadorUsoForm = String.format("%.2f", processadorUso).replace(",", ".");
+                Double processadorUsoInsert = Double.parseDouble(processadorUsoForm);
+//          Temperatura
+                Double temperatura = looca.getTemperatura().getTemperatura();
+
+                String insertStatement = "INSERT INTO dado VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+
+                con.update(insertStatement, fkTotem, memoriaUsoInsert, memoriaDisponivelInsert, processadorUsoInsert, temperatura);
+                System.out.println("Inseriu na tabela dado");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
 
     }
