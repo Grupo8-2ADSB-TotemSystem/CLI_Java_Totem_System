@@ -33,6 +33,7 @@ import com.github.britooo.looca.api.group.processos.ProcessoGrupo;
 import com.github.britooo.looca.api.group.temperatura.Temperatura;
 import com.github.britooo.looca.api.util.Conversor;
 import java.util.List;
+import java.util.Scanner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.concurrent.TimeUnit;
 import org.springframework.dao.DataAccessException;
@@ -48,6 +49,7 @@ public class App {
         Looca looca = new Looca();
         Connection connection = new Connection();
         JdbcTemplate con = connection.getConnection();
+        Scanner leitor = new Scanner(System.in);
 //        ConnectionSQL connectionSQL = new ConnectionSQL();
 //        JdbcTemplate conSQL = connectionSQL.getConnection();
 
@@ -55,8 +57,25 @@ public class App {
 //        Boolean first = true;
         Boolean start = true;
 
-        Login log = new Login();
-        log.show();
+//        Login log = new Login();
+//        log.show();
+        System.out.println("Bem vindo ao Totem System!");
+        System.out.println("Insira seu e-mail:");
+        String email = leitor.nextLine();
+        System.out.println("Insira sua senha:");
+        String senha = leitor.nextLine();
+
+        List emailVal = con.queryForList("SELECT email FROM usuario WHERE email = '" + email + "' and senha = '" + senha + "'");
+        String emailString = String.valueOf(emailVal);
+        List senhaVal = con.queryForList("SELECT senha FROM usuario WHERE senha = '" + senha + "' and email = '" + email + "'");
+        String senhaString = String.valueOf(senhaVal);
+//        System.out.println(emailString);
+//        System.out.println(senhaVal);
+
+        if (emailString.equals("[{email=" + email + "}]") && senhaString.equals("[{senha=" + senha + "}]")) {
+            System.out.println("O sistema está rodando!");
+
+        }
 
         // Limpar as tabelas
         try {
@@ -65,24 +84,21 @@ public class App {
             String deleteMemoria = String.format("DELETE FROM memoria WHERE fkTotem = %d;", fkTotem);
             con.update(deleteMemoria);
             String deleteProcessador = String.format("DELETE FROM processador WHERE fkTotem = %d;", fkTotem);
-            con.update(deleteProcessador); 
-            
+            con.update(deleteProcessador);
+
         } catch (DataAccessException e) {
-            
+
         }
 
 //        System.out.println("Deletou???");
         // Inserir na tabela disco
-
 //        long volumeTotal = looca.getGrupoDeDiscos().getTamanhoTotal();
 //        String volumeTotalInsert = Conversor.formatarBytes(volumeTotal);
 //
 //        String insertStatementDisco = "INSERT INTO disco VALUES (?, ?);";
-
 //        con.update(insertStatementDisco, fkTotem, volumeTotalInsert);
 //        conSQL.update(insertStatementDisco, fkTotem, volumeTotalInsert);
 //        System.out.println("Inseriu na tabela disco");
-
         // Inserir na tabela memoria
         long memoriaTotal = looca.getMemoria().getTotal();
         String memoriaTotalInsert = Conversor.formatarBytes(memoriaTotal);
@@ -116,7 +132,7 @@ public class App {
             Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
 //          RAM
             long memoriaDisponivel = looca.getMemoria().getDisponivel();
-            String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB","");
+            String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB", "");
             Double memoriaDisponivelInsert = Double.parseDouble(memoriaDisponiveForm);
 //          Processador
             Double processadorUso = looca.getProcessador().getUso();
@@ -130,7 +146,7 @@ public class App {
 
             con.update(insertStatement, fkTotem, memoriaUsoInsert, memoriaDisponivelInsert, processadorUsoInsert, temperatura);
 //            conSQL.update(insertStatement2, fkTotem, memoriaUsoInsert, memoriaDisponivelinsert, processadorUsoInsert, temperatura);
-            System.out.println("Inseriu na tabela dado");
+//            System.out.println("Inseriu na tabela dado");
         }
 
     }
