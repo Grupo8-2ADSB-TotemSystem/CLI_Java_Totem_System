@@ -1,0 +1,5 @@
+ERROR!!!
+
+java.lang.RuntimeException: Uncompilable code - cannot find symbol
+  symbol:   variable memoriaDisponivel
+  location: class com.mycompany.totem_system.App

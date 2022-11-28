@@ -1,0 +1,3 @@
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+org.springframework.jdbc.UncategorizedSQLException: PreparedStatementCallback; uncategorized SQLException for SQL [INSERT INT dado VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)]; SQL state [S0001]; error code [102]; Incorrect syntax near 'dado'.; nested exception is com.microsoft.sqlserver.jdbc.SQLServerException: Incorrect syntax near 'dado'.
