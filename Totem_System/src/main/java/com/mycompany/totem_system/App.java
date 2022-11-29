@@ -54,8 +54,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  */
 public class App {
 
-    public Integer totem;
-
     public static void main(String[] args) throws InterruptedException, IOException {
         JSONObject mensage = new JSONObject();
         Date dataHoraAtual = new Date();
@@ -208,7 +206,7 @@ public class App {
 
                 con.update(insertStatement, fkTotem, memoriaUsoInsert, memoriaDisponivelInsert, processadorUsoInsert, temperatura);
 //            conSQL.update(insertStatement2, fkTotem, memoriaUsoInsert, memoriaDisponivelinsert, processadorUsoInsert, temperatura);
-                System.out.println("Inseriu na tabela dado");
+//                System.out.println("Inseriu na tabela dado");
 
 //            Alerta memoria
                 
@@ -221,22 +219,27 @@ public class App {
                     processadorMax = dado.getProcessadorUsoMax();
                     temperaturaMax = dado.getTemperaturaMax();
                     
-                    Double aa = memoriaUsoInsert / (memTotalInsert / 100);
+                    Double memoriaRam = memoriaUsoInsert / (memTotalInsert / 100);
+//                    System.out.println(memoriaRam);
+                    String memoria100 = String.format("%.2f", memoriaRam);
+//                    System.out.println(memoria100);
 //                    System.out.println("####" + aa);
                     if ((memoriaUsoInsert / (memTotalInsert / 100)) > memoriaMax && meMsg == false) {
                         mensage.put("text", "O uso da memória superou o limite!!\n"
-                                + "Uso de memória: " + memoriaUsoInsert);
+                                + "Uso de memória: " + memoria100);
                         meMsg = true;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada!!");
+                        System.out.println("O uso da memória superou o limite!!\n"
+                                + "Uso de memória: " + memoria100);
                     }
 //                    memoriaUsoInsert = 0.5;
                     if (meMsg && (memoriaUsoInsert / (memTotalInsert / 100)) < memoriaMax) {
                         mensage.put("text", "O uso da memória voltou ao normal!!\n"
-                                + "Uso de memória: " + memoriaUsoInsert);
+                                + "Uso de memória: " + memoria100);
                         meMsg = false;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada2!!");
+                        System.out.println("O uso da memória superou o limite!!\n"
+                                + "Uso de memória: " + memoria100);
                     }
 
 //            Alerta processador
@@ -246,7 +249,8 @@ public class App {
                                 + "Uso de memória: " + processadorUsoInsert);
                         proMsg = true;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada!!");
+                        System.out.println("O uso do processador superou o limite!!\n"
+                                + "Uso de memória: " + processadorUsoInsert);
                     }
 //                    processadorUsoInsert = 0.5;
                     if (proMsg && processadorUsoInsert < processadorMax) {
@@ -254,7 +258,8 @@ public class App {
                                 + "Uso de memória: " + processadorUsoInsert);
                         proMsg = false;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada2!!");
+                        System.out.println("O uso do processador superou o limite!!\n"
+                                + "Uso de memória: " + processadorUsoInsert);
                     }
 //            Alerta temperatura
                     
@@ -263,7 +268,8 @@ public class App {
                                 + "Uso de memória: " + temperatura);
                         tempMsg = true;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada!!");
+                        System.out.println("O uso da temperatura superou o limite!!\n"
+                                + "Uso de memória: " + temperatura);
                     }
 //                    temperatura = 0.5;
                     if (tempMsg && memoriaUsoInsert < temperaturaMax) {
@@ -271,13 +277,13 @@ public class App {
                                 + "Uso de memória: " + temperatura);
                         tempMsg = false;
                         Slack.sendMensage(mensage);
-                        System.out.println("Mensagem enviada2!!");
+                        System.out.println("O uso da temperatura superou o limite!!\n"
+                                + "Uso de memória: " + temperatura);
                     }
                 }
             }
         } catch (Exception e) {
             String data = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(dataHoraAtual);
-            System.out.println("@@@@" + e);
             String logName = "ERROR-" + data + ".txt";
             OutputStream os = new FileOutputStream(logName); // nome do arquivo que será escrito
             Writer wr = new OutputStreamWriter(os); // criação de um escritor
@@ -290,17 +296,4 @@ public class App {
             br.close();
         }
     }
-
-    public Integer getTotem() {
-        return totem;
-    }
-
-    public void setTotem(Integer totem) {
-        this.totem = totem;
-    }
-
-    public App(Integer totem) {
-        this.totem = totem;
-    }
-
 }

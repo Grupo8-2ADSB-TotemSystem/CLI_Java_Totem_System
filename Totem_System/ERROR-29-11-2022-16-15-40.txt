@@ -1,0 +1,3 @@
+ERROR!!!
+
+java.lang.NumberFormatException: For input string: "76,32"
