@@ -1,0 +1,3 @@
+ERROR!!!
+
+org.springframework.jdbc.UncategorizedSQLException: StatementCallback; uncategorized SQLException for SQL [SELECT (idParametro, memoriaMax, processadorMax, temperaturaMax, fkTotem) FROM parametros WHERE fkTotem = 1;]; SQL state [S0001]; error code [102]; Incorrect syntax near ','.; nested exception is com.microsoft.sqlserver.jdbc.SQLServerException: Incorrect syntax near ','.

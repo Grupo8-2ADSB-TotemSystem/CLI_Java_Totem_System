@@ -46,12 +46,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 /**
  *
  * @author Vinícius
  */
 public class App {
+
+    public Integer totem;
 
     public static void main(String[] args) throws InterruptedException, IOException {
         JSONObject mensage = new JSONObject();
@@ -66,11 +69,16 @@ public class App {
         Integer fkTotem = 1;
 //        Boolean first = true;
         Boolean start = true;
+        
+        Boolean meMsg = false;
+        Boolean proMsg = false;
+        Boolean tempMsg = false;
 
 //        Login log = new Login();
 //        log.show();
         System.out.println("Bem vindo ao Totem System!");
         Boolean validation = false;
+        String emailCad = "";
         while (validation == false) {
             System.out.println("Insira seu e-mail:");
             String email = leitor.nextLine();
@@ -87,9 +95,39 @@ public class App {
             if (emailString.equals("[{email=" + email + "}]") && senhaString.equals("[{senha=" + senha + "}]")) {
                 System.out.println("O sistema está rodando!");
                 validation = true;
+                emailCad = email;
             } else {
                 System.out.println("Acesso negado!!\n"
                         + "Tente novamente\n");
+            }
+        }
+        System.out.println("Este totem já está cadastrado? y/n");
+        String totemCad = leitor.nextLine();
+
+        if (totemCad.equals("y")) {
+            System.out.println("Inserir o id do Totem:");
+            fkTotem = leitor.nextInt();
+        } else if (totemCad.equals("n")) {
+            System.out.println("O totem será cadastrado!");
+            System.out.println("Qual a marca do totem?");
+            String totemMarca = leitor.nextLine();
+            String totemSo = looca.getSistema().getSistemaOperacional();
+            List<Estacao> estacao = con.query("select idEstacao, fkEndereco, nomeEstacao from [dbo].[empresa] as e\n"
+                    + "join [dbo].[usuario] as u on e.idEmpresa = u.fkEmpresa\n"
+                    + "join [dbo].[estacao] as es on es.idEstacao = e.fkEstacao\n"
+                    + "where nomeUsuario = (select nomeUsuario from [dbo].[usuario] where email = '" + emailCad + "');", new BeanPropertyRowMapper(Estacao.class));
+            Integer idEstacao = 0;
+            for (Estacao dado : estacao) {
+                idEstacao = dado.getIdEstacao();
+
+            }
+            String insertStatementTotemCad = "INSERT INTO totem VALUES (?,  ?, ?);";
+
+            con.update(insertStatementTotemCad, idEstacao, totemMarca, totemSo);
+
+            List<Totem> totemT2 = con.query("select idTotem ,fkEstacao, marca, so from [dbo].[totem] where idTotem = (select max(idTotem) from [dbo].[totem]) and fkEstacao = 1;", new BeanPropertyRowMapper(Totem.class));
+            for (Totem dado : totemT2) {
+                fkTotem = dado.getIdTotem();
             }
         }
         try {
@@ -150,6 +188,10 @@ public class App {
                 long memoriaUso = looca.getMemoria().getEmUso();
                 String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".");
                 Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
+                Long memTotal = looca.getMemoria().getTotal();
+                String memTotalForm = Conversor.formatarBytes(memTotal).replace("GiB", "").replace(",", ".");
+                Double memTotalInsert = Double.parseDouble(memTotalForm);
+                
 //          RAM
                 long memoriaDisponivel = looca.getMemoria().getDisponivel();
                 String memoriaDisponiveForm = Conversor.formatarBytes(memoriaDisponivel).replace("GiB", "").replace(",", ".").replace("MiB", "");
@@ -169,56 +211,68 @@ public class App {
                 System.out.println("Inseriu na tabela dado");
 
 //            Alerta memoria
-                Boolean meMsg = false;
-                if (memoriaUsoInsert > 0.0 && meMsg == false) {
-                    mensage.put("text", "O uso da memória superou o limite!!\n"
-                            + "Uso de memória: " + memoriaUsoInsert);
-                    meMsg = true;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada!!");
-                }
-                memoriaUsoInsert = 0.5;
-                if (meMsg && memoriaUsoInsert < 1.0) {
-                    mensage.put("text", "O uso da memória voltou ao normal!!\n"
-                            + "Uso de memória: " + memoriaUsoInsert);
-                    meMsg = false;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada2!!");
-                }
+                
+                List<Parametro> cpuT1 = con.query("SELECT idParametro, memoriaUsoMax, processadorUsoMax, temperaturaMax, fkTotem FROM parametros WHERE fkTotem = " + fkTotem + ";", new BeanPropertyRowMapper(Parametro.class));
+                Double memoriaMax;
+                Double processadorMax;
+                Double temperaturaMax;
+                for (Parametro dado : cpuT1) {
+                    memoriaMax = dado.getMemoriaUsoMax();
+                    processadorMax = dado.getProcessadorUsoMax();
+                    temperaturaMax = dado.getTemperaturaMax();
+                    
+                    Double aa = memoriaUsoInsert / (memTotalInsert / 100);
+                    System.out.println("####" + aa);
+                    if ((memoriaUsoInsert / (memTotalInsert / 100)) > memoriaMax && meMsg == false) {
+                        mensage.put("text", "O uso da memória superou o limite!!\n"
+                                + "Uso de memória: " + memoriaUsoInsert);
+                        meMsg = true;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada!!");
+                    }
+//                    memoriaUsoInsert = 0.5;
+                    if (meMsg && (memoriaUsoInsert / (memTotalInsert / 100)) < memoriaMax) {
+                        mensage.put("text", "O uso da memória voltou ao normal!!\n"
+                                + "Uso de memória: " + memoriaUsoInsert);
+                        meMsg = false;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada2!!");
+                    }
 
 //            Alerta processador
-                Boolean proMsg = false;
-                if (processadorUsoInsert > 0.0 && proMsg == false) {
-                    mensage.put("text", "O uso do processador superou o limite!!\n"
-                            + "Uso de memória: " + processadorUsoInsert);
-                    proMsg = true;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada!!");
-                }
-                processadorUsoInsert = 0.5;
-                if (proMsg && processadorUsoInsert < 1.0) {
-                    mensage.put("text", "O uso do processador voltou ao normal!!\n"
-                            + "Uso de memória: " + processadorUsoInsert);
-                    proMsg = false;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada2!!");
-                }
+                    
+                    if (processadorUsoInsert > processadorMax && proMsg == false) {
+                        mensage.put("text", "O uso do processador superou o limite!!\n"
+                                + "Uso de memória: " + processadorUsoInsert);
+                        proMsg = true;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada!!");
+                    }
+//                    processadorUsoInsert = 0.5;
+                    if (proMsg && processadorUsoInsert < processadorMax) {
+                        mensage.put("text", "O uso do processador voltou ao normal!!\n"
+                                + "Uso de memória: " + processadorUsoInsert);
+                        proMsg = false;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada2!!");
+                    }
 //            Alerta temperatura
-                Boolean tempMsg = false;
-                if (temperatura >= 0.0 && tempMsg == false) {
-                    mensage.put("text", "O uso da temperatura superou o limite!!\n"
-                            + "Uso de memória: " + temperatura);
-                    tempMsg = true;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada!!");
-                }
-                temperatura = 0.5;
-                if (tempMsg && memoriaUsoInsert < 1.0) {
-                    mensage.put("text", "O uso da temperatura voltou ao normal!!\n"
-                            + "Uso de memória: " + temperatura);
-                    tempMsg = false;
-                    Slack.sendMensage(mensage);
-                    System.out.println("Mensagem enviada2!!");
+                    
+                    if (temperatura > temperaturaMax && tempMsg == false) {
+                        mensage.put("text", "O uso da temperatura superou o limite!!\n"
+                                + "Uso de memória: " + temperatura);
+                        tempMsg = true;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada!!");
+                    }
+//                    temperatura = 0.5;
+                    if (tempMsg && memoriaUsoInsert < temperaturaMax) {
+                        mensage.put("text", "O uso da temperatura voltou ao normal!!\n"
+                                + "Uso de memória: " + temperatura);
+                        tempMsg = false;
+                        Slack.sendMensage(mensage);
+                        System.out.println("Mensagem enviada2!!");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -236,4 +290,17 @@ public class App {
             br.close();
         }
     }
+
+    public Integer getTotem() {
+        return totem;
+    }
+
+    public void setTotem(Integer totem) {
+        this.totem = totem;
+    }
+
+    public App(Integer totem) {
+        this.totem = totem;
+    }
+
 }

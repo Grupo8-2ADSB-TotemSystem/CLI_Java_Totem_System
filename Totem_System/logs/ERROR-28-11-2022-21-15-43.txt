@@ -1,0 +1,3 @@
+ERROR!!!
+
+org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [INSERT INTO disco VALUES (?, ?);]; Cannot insert the value NULL into column 'fkTotem', table 'bd-totemsystem.dbo.disco'; column does not allow nulls. INSERT fails.; nested exception is com.microsoft.sqlserver.jdbc.SQLServerException: Cannot insert the value NULL into column 'fkTotem', table 'bd-totemsystem.dbo.disco'; column does not allow nulls. INSERT fails.
