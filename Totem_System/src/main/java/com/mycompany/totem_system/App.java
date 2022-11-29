@@ -80,7 +80,7 @@ public class App {
         Boolean validation = false;
         String emailCad = "";
         while (validation == false) {
-            System.out.println("Insira seu e-mail:");
+            System.out.println("Insira seu e-mail zé:");
             String email = leitor.nextLine();
             System.out.println("Insira sua senha:");
             String senha = leitor.nextLine();
@@ -278,7 +278,7 @@ public class App {
         } catch (Exception e) {
             String data = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(dataHoraAtual);
             System.out.println("@@@@" + e);
-            String logName = "ERRORrrr-" + data + ".txt";
+            String logName = "ERROR-" + data + ".txt";
             OutputStream os = new FileOutputStream(logName); // nome do arquivo que será escrito
             Writer wr = new OutputStreamWriter(os); // criação de um escritor
             BufferedWriter br = new BufferedWriter(wr); // adiciono a um escritor de buffer
