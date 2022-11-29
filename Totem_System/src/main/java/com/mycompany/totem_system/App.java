@@ -278,7 +278,7 @@ public class App {
         } catch (Exception e) {
             String data = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(dataHoraAtual);
             System.out.println("@@@@" + e);
-            String logName = "logs/ERROR-" + data + ".txt";
+            String logName = "ERROR-" + data + ".txt";
             OutputStream os = new FileOutputStream(logName); // nome do arquivo que será escrito
             Writer wr = new OutputStreamWriter(os); // criação de um escritor
             BufferedWriter br = new BufferedWriter(wr); // adiciono a um escritor de buffer
