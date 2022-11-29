@@ -80,7 +80,7 @@ public class App {
         Boolean validation = false;
         String emailCad = "";
         while (validation == false) {
-            System.out.println("Insira seu e-mail zé:");
+            System.out.println("Insira seu e-mail:");
             String email = leitor.nextLine();
             System.out.println("Insira sua senha:");
             String senha = leitor.nextLine();
@@ -186,10 +186,10 @@ public class App {
 //          Dados volateis
 //          Memoria
                 long memoriaUso = looca.getMemoria().getEmUso();
-                String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".");
+                String memoriaUsoForm = Conversor.formatarBytes(memoriaUso).replace("GiB", "").replace(",", ".").replace("MiB", "");
                 Double memoriaUsoInsert = Double.parseDouble(memoriaUsoForm);
                 Long memTotal = looca.getMemoria().getTotal();
-                String memTotalForm = Conversor.formatarBytes(memTotal).replace("GiB", "").replace(",", ".");
+                String memTotalForm = Conversor.formatarBytes(memTotal).replace("GiB", "").replace(",", ".").replace("MiB", "");
                 Double memTotalInsert = Double.parseDouble(memTotalForm);
                 
 //          RAM
