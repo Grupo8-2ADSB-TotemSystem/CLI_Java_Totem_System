@@ -283,7 +283,7 @@ public class App {
             Writer wr = new OutputStreamWriter(os); // criação de um escritor
             BufferedWriter br = new BufferedWriter(wr); // adiciono a um escritor de buffer
 
-            br.write("ERROR!!!");
+            br.write("ERRORrr!!!");
             br.newLine();
             br.newLine();
             br.write(e + "\n");
