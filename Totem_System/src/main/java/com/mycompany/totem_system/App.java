@@ -159,7 +159,7 @@ public class App {
             long memoriaTotal = looca.getMemoria().getTotal();
             String memoriaTotalForm = Conversor.formatarBytes(memoriaTotal).replace("GiB", "").replace(",", ".").replace("MiB", "");
             Double memoriaTotalInsert = Double.parseDouble(memoriaTotalForm);
-            System.out.println("@@@@" + memoriaTotalInsert);
+//            System.out.println("@@@@" + memoriaTotalInsert);
 
             String insertStatementMemoria = "INSERT INTO memoria VALUES (?,  ?);";
 
@@ -222,7 +222,7 @@ public class App {
                     temperaturaMax = dado.getTemperaturaMax();
                     
                     Double aa = memoriaUsoInsert / (memTotalInsert / 100);
-                    System.out.println("####" + aa);
+//                    System.out.println("####" + aa);
                     if ((memoriaUsoInsert / (memTotalInsert / 100)) > memoriaMax && meMsg == false) {
                         mensage.put("text", "O uso da memória superou o limite!!\n"
                                 + "Uso de memória: " + memoriaUsoInsert);
